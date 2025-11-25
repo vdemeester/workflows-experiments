@@ -17,18 +17,18 @@ jobs:
                 "command": "retest",
                 "permission": "write",
                 "issue_type": "pull-request",
-                "repository": "vdemeester/workflows-experiments"
+                "repository": "shortbrain/workflows-experiments"
               },
               {
                 "command": "build",
                 "permission": "write",
                 "issue_type": "pull-request",
-                "repository": "vdemeester/workflows-experiments"
+                "repository": "shortbrain/workflows-experiments"
               },
               {
                 "command": "cherry-pick",
                 "permission": "write",
                 "issue_type": "pull-request",
-                "repository": "vdemeester/workflows-experiments"
+                "repository": "shortbrain/workflows-experiments"
               }
             ]
