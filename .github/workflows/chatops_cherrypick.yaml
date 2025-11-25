@@ -71,6 +71,9 @@ jobs:
           {
             echo "🤖 Starting cherry-pick process..."
 
+            git config user.name "Shortbrain bot"
+            git config user.email "vincent+bot@sbr.pm"
+
             # Get PR information
             echo "Fetching PR #$PR_NUMBER information..."
             PR_DATA=$(gh pr view $PR_NUMBER --repo ${{ github.repository }} --json state,mergeCommit,mergedAt)
