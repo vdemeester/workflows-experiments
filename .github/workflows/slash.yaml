@@ -24,5 +24,11 @@ jobs:
                 "permission": "write",
                 "issue_type": "pull-request",
                 "repository": "vdemeester/workflows-experiments"
+              },
+              {
+                "command": "cherry-pick",
+                "permission": "write",
+                "issue_type": "pull-request",
+                "repository": "vdemeester/workflows-experiments"
               }
             ]

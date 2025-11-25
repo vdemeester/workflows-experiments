@@ -1,0 +1,92 @@
+name: Cherry Pick Command
+
+on:
+  repository_dispatch:
+    types: [cherry-pick-command]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  cherry-pick:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add reaction to trigger comment
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
+        with:
+          token: ${{ secrets.SBR_BOT_TOKEN }}
+          repository: ${{ github.event.client_payload.github.payload.repository.full_name }}
+          comment-id: ${{ github.event.client_payload.github.payload.comment.id }}
+          reactions: rocket
+
+      - name: Get target branch from command args
+        id: parse-args
+        run: |
+          TARGET_BRANCH="${{ github.event.client_payload.slash_command.args.unnamed.arg1 }}"
+
+          if [ -z "$TARGET_BRANCH" ]; then
+            echo "error=true" >> $GITHUB_OUTPUT
+            echo "message=Missing target branch. Usage: /cherry-pick <target-branch>" >> $GITHUB_OUTPUT
+          else
+            echo "branch=$TARGET_BRANCH" >> $GITHUB_OUTPUT
+            echo "error=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Comment on error
+        if: steps.parse-args.outputs.error == 'true'
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
+        with:
+          token: ${{ secrets.SBR_BOT_TOKEN }}
+          repository: ${{ github.event.client_payload.github.payload.repository.full_name }}
+          issue-number: ${{ github.event.client_payload.github.payload.issue.number }}
+          body: |
+            ❌ **Cherry-pick failed**: ${{ steps.parse-args.outputs.message }}
+
+            **Usage**: `/cherry-pick <target-branch>`
+            **Example**: `/cherry-pick release-v1.0`
+
+      - name: Checkout repository
+        if: steps.parse-args.outputs.error == 'false'
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        with:
+          token: ${{ secrets.SBR_BOT_TOKEN }}
+          fetch-depth: 0
+
+      - name: Perform cherry-pick
+        if: steps.parse-args.outputs.error == 'false'
+        id: cherry-pick
+        uses: vendoo/gha-cherry-pick@cf5917fb432a6a459e27afdde89a4ce67448c37d # v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.SBR_BOT_TOKEN }}
+        with:
+          branch: ${{ steps.parse-args.outputs.branch }}
+
+      - name: Comment on success
+        if: steps.parse-args.outputs.error == 'false' && steps.cherry-pick.outcome == 'success'
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
+        with:
+          token: ${{ secrets.SBR_BOT_TOKEN }}
+          repository: ${{ github.event.client_payload.github.payload.repository.full_name }}
+          issue-number: ${{ github.event.client_payload.github.payload.issue.number }}
+          body: |
+            ✅ **Cherry-pick successful!**
+
+            A new pull request has been created to cherry-pick this change to `${{ steps.parse-args.outputs.branch }}`.
+
+            Please review and merge the cherry-pick PR.
+
+      - name: Comment on failure
+        if: steps.parse-args.outputs.error == 'false' && steps.cherry-pick.outcome == 'failure'
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
+        with:
+          token: ${{ secrets.SBR_BOT_TOKEN }}
+          repository: ${{ github.event.client_payload.github.payload.repository.full_name }}
+          issue-number: ${{ github.event.client_payload.github.payload.issue.number }}
+          body: |
+            ❌ **Cherry-pick failed!**
+
+            The automatic cherry-pick to `${{ steps.parse-args.outputs.branch }}` encountered conflicts or errors.
+
+            You'll need to manually cherry-pick this PR.
