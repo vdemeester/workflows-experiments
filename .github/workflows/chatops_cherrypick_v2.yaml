@@ -1,0 +1,46 @@
+name: Cherry Pick Command (Go)
+
+on:
+  repository_dispatch:
+    types: [cherry-pick-command]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  cherry-pick:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        with:
+          token: ${{ secrets.SBR_BOT_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@41dfa10bad2bb2ae585af6ee5bb4d7d973ad74ed # v6.0.0
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Parse branches from args
+        id: parse-branches
+        run: |
+          # Extract all unnamed arguments (arg1, arg2, arg3, ...)
+          ARGS_JSON='${{ toJson(github.event.client_payload.slash_command.args.unnamed) }}'
+          BRANCHES=$(echo "$ARGS_JSON" | jq -r '[to_entries[] | select(.key | startswith("arg")) | .value | select(. != null and . != "")] | join(",")')
+          echo "branches=$BRANCHES" >> $GITHUB_OUTPUT
+          echo "Parsed branches: $BRANCHES"
+
+      - name: Run cherry-pick tool
+        run: |
+          go run ./cmd/cherry-pick \
+            --pr-number=${{ github.event.client_payload.pull_request.number }} \
+            --branches="${{ steps.parse-branches.outputs.branches }}" \
+            --repo=${{ github.repository }} \
+            --comment-id=${{ github.event.client_payload.github.payload.comment.id }} \
+            --issue-number=${{ github.event.client_payload.github.payload.issue.number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.SBR_BOT_TOKEN }}
