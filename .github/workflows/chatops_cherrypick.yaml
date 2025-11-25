@@ -19,7 +19,7 @@ jobs:
           token: ${{ secrets.SBR_BOT_TOKEN }}
           repository: ${{ github.event.client_payload.github.payload.repository.full_name }}
           comment-id: ${{ github.event.client_payload.github.payload.comment.id }}
-          reactions: +1
+          reactions: "+1"
 
       - name: Get target branch from command args
         id: parse-args
@@ -72,6 +72,7 @@ jobs:
         run: |
           # Get the current job logs and extract cherry-pick output
           LOGS=$(gh run view ${{ github.run_id }} --log --repo ${{ github.repository }} 2>&1 | grep -A 50 "Perform cherry-pick" | tail -30 || echo "Unable to fetch logs")
+          echo $LOGS
           # Escape for GitHub output
           EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
           echo "logs<<$EOF" >> $GITHUB_OUTPUT
