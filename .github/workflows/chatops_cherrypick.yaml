@@ -186,7 +186,7 @@ jobs:
           repository: ${{ github.event.client_payload.github.payload.repository.full_name }}
           issue-number: ${{ github.event.client_payload.github.payload.issue.number }}
           body: |
-            ℹ️ **Cherry-pick to `${{ matrix.branch }}` already exists!**
+            👴ℹ️ **Cherry-pick to `${{ matrix.branch }}` already exists!**
 
             A pull request for this cherry-pick already exists: #${{ steps.cherry-pick.outputs.existing_pr_number }}
 
@@ -200,7 +200,7 @@ jobs:
           repository: ${{ github.event.client_payload.github.payload.repository.full_name }}
           issue-number: ${{ github.event.client_payload.github.payload.issue.number }}
           body: |
-            ✅ **Cherry-pick to `${{ matrix.branch }}` successful!**
+            👴✅ **Cherry-pick to `${{ matrix.branch }}` successful!**
 
             A new pull request has been created to cherry-pick this change to `${{ matrix.branch }}`.
 
@@ -214,7 +214,7 @@ jobs:
           repository: ${{ github.event.client_payload.github.payload.repository.full_name }}
           issue-number: ${{ github.event.client_payload.github.payload.issue.number }}
           body: |
-            ❌ **Cherry-pick to `${{ matrix.branch }}` failed!**
+            👴❌ **Cherry-pick to `${{ matrix.branch }}` failed!**
 
             The automatic cherry-pick to `${{ matrix.branch }}` failed.
 
