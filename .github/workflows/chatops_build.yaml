@@ -27,14 +27,14 @@ jobs:
           echo "Building PR #$PR_NUMBER at SHA $SHA"
 
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           ref: ${{ steps.get-pr.outputs.SHA }}
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
         with:
-          go-version: '1.21'
+          go-version: '1.23'
 
       - name: Build
         run: go build -v ./...
@@ -44,7 +44,7 @@ jobs:
 
       - name: Add success reaction
         if: success()
-        uses: peter-evans/create-or-update-comment@v4
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.event.client_payload.github.payload.repository.full_name }}
@@ -53,7 +53,7 @@ jobs:
 
       - name: Add failure comment
         if: failure()
-        uses: peter-evans/create-or-update-comment@v4
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.event.client_payload.github.payload.repository.full_name }}
