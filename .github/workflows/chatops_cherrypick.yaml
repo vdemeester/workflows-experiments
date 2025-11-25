@@ -63,6 +63,21 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.SBR_BOT_TOKEN }}
           PR_NUMBER: ${{ github.event.client_payload.pull_request.number }}
 
+      - name: Get cherry-pick logs on failure
+        if: steps.parse-args.outputs.error == 'false' && steps.cherry-pick.outcome == 'failure'
+        id: get-logs
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.SBR_BOT_TOKEN }}
+        run: |
+          # Get the current job logs and extract cherry-pick output
+          LOGS=$(gh run view ${{ github.run_id }} --log --repo ${{ github.repository }} 2>&1 | grep -A 50 "Perform cherry-pick" | tail -30 || echo "Unable to fetch logs")
+          # Escape for GitHub output
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "logs<<$EOF" >> $GITHUB_OUTPUT
+          echo "$LOGS" >> $GITHUB_OUTPUT
+          echo "$EOF" >> $GITHUB_OUTPUT
+
       - name: Comment on success
         if: steps.parse-args.outputs.error == 'false' && steps.cherry-pick.outcome == 'success'
         uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
@@ -89,12 +104,17 @@ jobs:
 
             The automatic cherry-pick to `${{ steps.parse-args.outputs.branch }}` failed.
 
+            **Error output:**
+            ```
+            ${{ steps.get-logs.outputs.logs }}
+            ```
+
             **Possible causes:**
             - The PR is not merged yet (cherry-pick requires merged PRs)
             - Merge conflicts exist between this PR and the target branch
             - The target branch `${{ steps.parse-args.outputs.branch }}` does not exist
 
             **Next steps:**
-            - Check the [action logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for detailed error messages
+            - Check the [action logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for complete details
             - If the PR is not merged, merge it first and try again
             - If there are conflicts, you'll need to manually cherry-pick this PR
