@@ -60,8 +60,6 @@ jobs:
         uses: vendoo/gha-cherry-pick@cf5917fb432a6a459e27afdde89a4ce67448c37d # v1
         env:
           GITHUB_TOKEN: ${{ secrets.SBR_BOT_TOKEN }}
-        with:
-          branch: ${{ steps.parse-args.outputs.branch }}
 
       - name: Comment on success
         if: steps.parse-args.outputs.error == 'false' && steps.cherry-pick.outcome == 'success'
