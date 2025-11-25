@@ -18,7 +18,7 @@ jobs:
       - name: Get PR info
         id: get-pr
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.SBR_BOT_TOKEN }}
         run: |
           PR_NUMBER=${{ github.event.client_payload.pull_request.number }}
           echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_OUTPUT
@@ -46,7 +46,7 @@ jobs:
         if: success()
         uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.SBR_BOT_TOKEN }}
           repository: ${{ github.event.client_payload.github.payload.repository.full_name }}
           comment-id: ${{ github.event.client_payload.github.payload.comment.id }}
           reactions: hooray
@@ -55,7 +55,7 @@ jobs:
         if: failure()
         uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.SBR_BOT_TOKEN }}
           repository: ${{ github.event.client_payload.github.payload.repository.full_name }}
           issue-number: ${{ github.event.client_payload.pull_request.number }}
           body: |

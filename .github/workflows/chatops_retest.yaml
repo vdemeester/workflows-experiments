@@ -18,7 +18,7 @@ jobs:
       - name: Get PR SHA
         id: get-sha
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.SBR_BOT_TOKEN }}
         run: |
           PR_NUMBER=${{ github.event.client_payload.pull_request.number }}
           echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_OUTPUT
@@ -29,7 +29,7 @@ jobs:
       - name: Get failed runs
         id: get-runs
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.SBR_BOT_TOKEN }}
         run: |
           SHA=${{ steps.get-sha.outputs.SHA }}
           FAILED_RUNS=$(gh run list --repo ${{ github.repository }} --commit $SHA --json databaseId,status,conclusion --jq '.[] | select(.conclusion=="failure") | .databaseId' | tr '\n' ' ')
@@ -39,7 +39,7 @@ jobs:
       - name: Rerun failed runs
         if: steps.get-runs.outputs.FAILED_RUNS != ''
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.SBR_BOT_TOKEN }}
         run: |
           for RUN_ID in ${{ steps.get-runs.outputs.FAILED_RUNS }}; do
             echo "Rerunning failed jobs for run ID: $RUN_ID"
@@ -50,7 +50,7 @@ jobs:
         if: success()
         uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.SBR_BOT_TOKEN }}
           repository: ${{ github.event.client_payload.github.payload.repository.full_name }}
           comment-id: ${{ github.event.client_payload.github.payload.comment.id }}
           reactions: hooray
@@ -59,7 +59,7 @@ jobs:
         if: failure()
         uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.SBR_BOT_TOKEN }}
           repository: ${{ github.event.client_payload.github.payload.repository.full_name }}
           issue-number: ${{ github.event.client_payload.pull_request.number }}
           body: |
